@@ -46,3 +46,12 @@ foto_koridor.jpg MAHZBXNiE68
 foto_ruko.jpg MAHZBXWbUAc
 foto_sawah.jpg MAHZBfREqf0
 foto_pkl.jpg MAHZBQ9xGNg
+# Revisi Bab VIII (metode buku ajar)
+kdb_hitung MAHZBU29ltI
+kdb_zona MAHZBZ7Zso8
+tinggi_hitung MAHZBd0FtQY
+gsb_hitung MAHZBTu81zY
+gsb_simpang MAHZBT2Er2A
+jarak_hitung MAHZBWV4Vsk
+metode_kt MAHZBZIofak
+amplop_rekap MAHZBXWbsA0
