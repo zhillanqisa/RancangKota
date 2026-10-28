@@ -19,7 +19,8 @@ def items(luas):
         ('fasil', 'Area bermain | plaza | lawn taman RT'),
         ('tabebuya', 'Pohon berbunga (tabebuya) taman RT'),
         ('pju', 'Lampu jalan / taman (PJU)'),
-        ('potong', 'Garis potong penampang (A, B1, B2, C)'),
+        ('pintu', 'Pintu masuk / keluar taman RT'),
+        ('potong', 'Garis potong penampang (A, B1, B2, C, D)'),
     ]
     y = 2018.0
     for key, txt in rows:
@@ -52,13 +53,17 @@ def items(luas):
             out.append(K('circle', c=((X0 + X1) / 2, cy), r=2.6, fill=(250, 220, 90), edge=(60, 60, 60), lw=0.4))
             out.append(K('line', pts=[((X0 + X1) / 2 - 2.6, cy), ((X0 + X1) / 2 + 2.6, cy)], color=(60, 60, 60), lw=0.4))
             out.append(K('line', pts=[((X0 + X1) / 2, cy - 2.6), ((X0 + X1) / 2, cy + 2.6)], color=(60, 60, 60), lw=0.4))
+        elif key == 'pintu':
+            out.append(K('line', pts=[(X0 + 3, cy), (X1 - 3, cy)], color=(192, 40, 40), lw=1.4))
+            out.append(K('poly', pts=[(X0 + 1, cy), (X0 + 5, cy - 2.4), (X0 + 5, cy + 2.4)], fill=(192, 40, 40)))
+            out.append(K('poly', pts=[(X1 - 1, cy), (X1 - 5, cy - 2.4), (X1 - 5, cy + 2.4)], fill=(192, 40, 40)))
         elif key == 'potong':
             out.append(K('line', pts=[(X0, cy), (X1, cy)], color=C['potong'], lw=1.2, dash=(3, 1.5)))
             out.append(K('circle', c=(X0 + 2.5, cy), r=3.2, fill=C['potong'], edge=(255, 255, 255), lw=0.3))
         out.append(K('text', xy=(TX, y + 7.9), s=txt, size=9.3, color=(0, 0, 0)))
         y += 15.85
     # keterangan 34, 35 (kolom kanan)
-    for cx, n, txt in [(2959.3, '34', 'Taman RT A & B (rencana)'), (3121.0, '35', 'Penataan jalan permukiman (pot. A-C)')]:
+    for cx, n, txt in [(2959.3, '34', 'Taman RT A & B (rencana)'), (3121.0, '35', 'Penataan jalan permukiman (pot. A-D)')]:
         yy = 2059.6
         out.append(K('circle', c=(cx, yy + 4.4), r=5.2, fill=(255, 255, 255), edge=(0, 0, 0), lw=0.7))
         out.append(K('text', xy=(cx, yy + 6.9), s=n, size=6.4, color=(0, 0, 0), ha='center'))

@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.join(HERE, '..', 'gen'))
 import ezdxf
 from ezdxf.enums import TextEntityAlignment, MTextEntityAlignment
 from penampang import ROADS
+from shapely.ops import unary_union
 
 ARIAL = 'D32_ARIAL'
 TH = 0.25            # tinggi teks 2,5 mm @1:100
@@ -201,20 +202,20 @@ def build_section(msp, ox, oy, key, which):
         ren = (which == 'ren')
         if t == 'persil':
             kind = e.get('kind', 'rumah')
-            if kind in ('lahan', 'taman'):
+            if kind in ('lahan', 'taman', 'lahan2'):
                 pen.pl([(x0, 0.05), (x1, 0.05)], 'D32_PNP_POTONGAN')
                 tanah_dasar(pen, x0, x1, 0.05, -0.6)
                 if kind == 'taman':
                     pohon(pen, x0 + 1.5, 0.05, 4.6, 1.3)
-                    pen.text(((x0 + x1) / 2, -1.0), 'TAMAN RT A', h=TH, align='MIDDLE_CENTER')
+                    pen.text(((x0 + x1) / 2, -1.0), e.get('label', 'TAMAN RT A'), h=TH, align='MIDDLE_CENTER')
                 else:
                     perdu(pen, x0 + 0.4, x0 + 1.6, 0.05, 0.8)
                     pen.text(((x0 + x1) / 2, 2.0), 'Lahan kosong', h=TH * 0.8)
-                    pen.text(((x0 + x1) / 2, 1.65), '(rencana Taman RT A)', h=TH * 0.8)
+                    pen.text(((x0 + x1) / 2, 1.65), '(rencana Taman RT %s)' % ('B' if kind == 'lahan2' else 'A'), h=TH * 0.8)
             else:
                 pen.pl([(x0, 0.05), (x1, 0.05)], 'D32_PNP_POTONGAN')
                 tanah_dasar(pen, x0, x1, 0.05, -0.6)
-                lbl = {'rumah': 'PERSIL WARGA', 'sekolah': 'ZONA PENDIDIKAN'}[kind]
+                lbl = {'rumah': 'PERSIL WARGA', 'sekolah': 'ZONA PENDIDIKAN', 'balai': 'BALAI PELATIHAN UMKM'}[kind]
                 pen.text(((x0 + x1) / 2, 0.55), lbl, h=TH * 0.8)
                 pen.text(((x0 + x1) / 2, 0.22), '(tidak diubah)', h=TH * 0.7)
             x = x1; continue
@@ -354,15 +355,18 @@ def build_section(msp, ox, oy, key, which):
 SECTIONS = [('betet', 'A', "POTONGAN A-A'", 'JL. BETET'),
             ('cendrawasih_b1', 'B1', "POTONGAN B1-B1'", 'JL. CENDRAWASIH - SEGMEN PERMUKIMAN'),
             ('cendrawasih_b2', 'B2', "POTONGAN B2-B2'", 'JL. CENDRAWASIH - SEGMEN TEPI REL'),
-            ('letkol', 'C', "POTONGAN C-C'", 'JL. LETKOL SUDARSO')]
+            ('letkol', 'C', "POTONGAN C-C'", 'JL. LETKOL SUDARSO'),
+            ('ampas', 'D', "POTONGAN D-D'", 'JL. AMPAS WARAS - DEPAN BALAI UMKM')]
 
 def denah(msp, ox, oy, cut_key, half_len=24.0, half_w=7.5):
     sys.path.insert(0, HERE)
-    import desain_jalan as DJ, scene
+    import desain_jalan2 as DJ, scene2 as scene
     from shapely.geometry import Point, Polygon, box
     from shapely import affinity
-    nm = {'A': 'BETET', 'B1': 'CENDRAWASIH_B1', 'B2': 'CENDRAWASIH_B2', 'C': 'LETKOL'}[cut_key]
-    D = DJ.build(); r = D[nm]; L = DJ.CL[nm]
+    nm = {'A': 'BETET', 'B1': 'CENDRAWASIH_B1', 'B2': 'CENDRAWASIH_B2', 'C': 'LETKOL', 'D': 'AMPAS_WARAS'}[cut_key]
+    global _DJB
+    if '_DJB' not in globals(): _DJB = DJ.build()
+    D = _DJB; r = D[nm]; L = DJ.CL[nm]
     a, b = scene.POTONG[cut_key]
     mid = Point((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
     d0 = L.project(mid); p = L.interpolate(d0); q = L.interpolate(min(L.length, d0 + 1)); q0 = L.interpolate(max(0, d0 - 1))
@@ -382,8 +386,8 @@ def denah(msp, ox, oy, cut_key, half_len=24.0, half_w=7.5):
                 h.paths.add_polyline_path(list(pg.exterior.coords)[:-1], is_closed=True)
             msp.add_lwpolyline(list(pg.exterior.coords)[:-1], close=True, dxfattribs={'layer': layer})
     draw(DJ.ROADS, 'D32_PNP_TAMPAK')
-    draw(DJ.BUILD, 'D32_PNP_TAMPAK', 'ANSI31', 2.5, 0)
-    draw(r['aspal'].difference(DJ.BUILD.buffer(0.15)), 'D32_PNP_POTONGAN', 'AR-SAND', 0.09)
+    draw(unary_union([g for g in DJ.BLD if not any(g.equals(h) for h in D['hapus_jalan'])]), 'D32_PNP_TAMPAK', 'ANSI31', 2.5, 0)
+    draw(D['aspal_all'], 'D32_PNP_POTONGAN', 'AR-SAND', 0.09)
     for k, pat, sc in (('trotoar', 'AR-HBONE', 0.025), ('pedsep', 'AR-B816', 0.025), ('hijau', 'GRASS', 0.04), ('pagar', 'GRASS', 0.04),
                        ('saluran', 'AR-CONC', 0.01), ('bahu', 'AR-CONC', 0.01)):
         if k in r: draw(r[k], 'D32_PNP_KONSTRUKSI', pat, sc)
@@ -432,14 +436,14 @@ def denah(msp, ox, oy, cut_key, half_len=24.0, half_w=7.5):
 def keyplan(lay, x0, y0, w, h, cut_key):
     import geopandas as gpd
     sys.path.insert(0, HERE)
-    import scene
+    import scene2 as scene
     dl = gpd.read_file('/home/user/RancangKota/Delineasi Tapak D3.2 Baru/Delineasi Tapak D3.2 Baru.shp').to_crs(32749).geometry.iloc[0]
     cl = json.load(open(os.path.join(HERE, 'ruas_cl.json')))
     bx0, by0, bx1, by1 = dl.bounds
     s = min(w / (bx1 - bx0), h / (by1 - by0)) * 0.92
     T = lambda X, Y: (x0 + (w - (bx1 - bx0) * s) / 2 + (X - bx0) * s, y0 + (h - (by1 - by0) * s) / 2 + (Y - by0) * s)
     lay.add_lwpolyline([T(*q) for q in dl.exterior.coords], close=True, dxfattribs={'layer': 'D32_KOP_TIPIS', 'color': 6})
-    hi = {'A': ['BETET'], 'B1': ['CENDRAWASIH_B1'], 'B2': ['CENDRAWASIH_B2'], 'C': ['LETKOL']}[cut_key]
+    hi = {'A': ['BETET'], 'B1': ['CENDRAWASIH_B1'], 'B2': ['CENDRAWASIH_B2'], 'C': ['LETKOL'], 'D': ['AMPAS_WARAS']}[cut_key]
     for nm, pts in cl.items():
         lay.add_lwpolyline([T(*q) for q in pts], dxfattribs={'layer': 'D32_KOP_TIPIS', 'color': 1 if nm in hi else 8,
                                                               'const_width': 1.0 if nm in hi else 0.35})
@@ -498,7 +502,7 @@ def kop(lay, cut_key, title, sub, sheet_no):
     T(KX + 4, yb - 18.5, 'SKALA', 1.9); T(KX + 4, yb - 22.5, '1 : 100 (A3)', 3.2)
     T(KX + 52, yb - 18.5, 'TANGGAL', 1.9); T(KX + 52, yb - 22.5, '28 Okt 2026', 2.6)
     lay.add_line((KX + 48, yb - 15), (KX + 48, Y0), dxfattribs={'layer': 'D32_KOP'})
-    T(KX + 80, yb - 18.5, 'LEMBAR', 1.9); T(KX + 80, yb - 22.5, '%d / 4' % sheet_no, 3.2)
+    T(KX + 80, yb - 18.5, 'LEMBAR', 1.9); T(KX + 80, yb - 22.5, '%d / 5' % sheet_no, 3.2)
     lay.add_line((KX + 76, yb - 15), (KX + 76, Y0), dxfattribs={'layer': 'D32_KOP'})
 
 def main(fn):
@@ -514,7 +518,7 @@ def main(fn):
             ox = col * 22.0
             pen = Pen(msp, ox, oy)
             total, ybot = build_section(msp, ox, oy, key, which)
-            jn = {'betet': 'Jl. Betet', 'cendrawasih_b1': 'Jl. Cendrawasih', 'cendrawasih_b2': 'Jl. Cendrawasih', 'letkol': 'Jl. Letkol Sudarso'}[key]
+            jn = {'betet': 'Jl. Betet', 'cendrawasih_b1': 'Jl. Cendrawasih', 'cendrawasih_b2': 'Jl. Cendrawasih', 'letkol': 'Jl. Letkol Sudarso', 'ampas': 'Jl. Ampas Waras'}[key]
             t_ = msp.add_text(jn, dxfattribs={'height': 0.55, 'style': 'D32_TIMES', 'layer': 'D32_PNP_TEKS'})
             t_.set_placement((ox + total / 2, oy + 9.3), align=TextEntityAlignment.BOTTOM_CENTER)
             lab = '%s  -  %s' % (title, 'EKSISTING' if which == 'eks' else 'RENCANA')
@@ -549,6 +553,6 @@ def main(fn):
     return doc
 
 if __name__ == '__main__':
-    os.makedirs(os.path.join(HERE, '..', 'out2', 'dxf'), exist_ok=True)
-    main(os.path.join(HERE, '..', 'out2', 'dxf', 'D32_Penampang_Jalan_Permukiman_Rev28Okt.dxf'))
+    os.makedirs(os.path.join(HERE, '..', 'out3', 'dxf'), exist_ok=True)
+    main(os.path.join(HERE, '..', 'out3', 'dxf', 'D32_Penampang_Jalan_Permukiman_Rev28Okt.dxf'))
     print('ok')

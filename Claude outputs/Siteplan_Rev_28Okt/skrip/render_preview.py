@@ -71,6 +71,8 @@ def draw_kop(ax, K, z=60):
             ax.plot(xs, ys, color=rgb(p['color']), lw=p['lw'], zorder=z + 1, **kw)
         elif p['k'] == 'circle':
             ax.add_patch(Circle(p['c'], p['r'], fc=rgb(p['fill']), ec=rgb(p['edge']) if p.get('edge') else 'none', lw=p.get('lw', 0), zorder=z + 2))
+        elif p['k'] == 'poly':
+            ax.add_patch(MPoly(p['pts'], closed=True, fc=rgb(p['fill']), ec='none', zorder=z + 2))
         elif p['k'] == 'text':
             ax.text(p['xy'][0], p['xy'][1], p['s'], fontsize=p['size'], color=rgb(p['color']), ha=p.get('ha', 'left'), va='baseline',
                     family='Liberation Sans' if False else 'FreeSans', zorder=z + 3)

@@ -110,6 +110,9 @@ def write_kop(K, fn):
         elif p['k'] == 'line':
             ex = dict(linetype='DASHED', ltscale=(p['dash'][0] + p['dash'][1]) * f / 0.75) if p.get('dash') else {}
             outline(msp, [T(*q) for q in p['pts']], L, p['color'], max(0.13, p['lw'] * f), closed=False, **ex)
+        elif p['k'] == 'poly':
+            pts = [T(*q) for q in p['pts']]
+            h = msp.add_hatch(dxfattribs={'layer': L}); h.set_solid_fill(rgb=p['fill']); h.paths.add_polyline_path(pts, is_closed=True)
         elif p['k'] == 'circle':
             c = T(*p['c']); r = p['r'] * f
             h = msp.add_hatch(dxfattribs={'layer': L}); h.set_solid_fill(rgb=p['fill']); h.paths.add_edge_path().add_arc(c, r, 0, 360)
