@@ -33,19 +33,27 @@ Lanjutan dari Site Plan **Rev 24 Okt** (revisi kedua 28 Okt: jalan menyambung + 
 | `dxf/D32_Penampang_Jalan_Permukiman_Rev28Okt.dxf` | **Sumber CAD penampang**: model space (meter) + 5 layout A3 (`PNP_A_BETET`, `PNP_B1_…`, `PNP_B2_…`, `PNP_C_…`, `PNP_D_AMPAS_WARAS`). Bisa dibuka di AutoCAD lalu *Save As* .dwg |
 | `dxf/D32_Overlay_Model_Rev28Okt_UTM49S.dxf` | Jalan, taman, pohon (block), dan garis potong dalam **UTM 49S (meter)** |
 | `dxf/D32_Overlay_KopA0_Rev28Okt_mm.dxf` | Tambahan legenda/keterangan kop dalam **mm kertas A0** |
+| `D32_Rev28Okt.lsp` | **Perintah AutoCAD `D32REV28`**: menerapkan revisi ke DWG Rev 24 Okt final dan menyimpan DWG Rev 28 Okt |
 | `skrip/` | Skrip pembuat (geometri jalan `desain_jalan.py`, taman `desain_taman.py`, gambar `scene.py`, penampang `penampang_teknik.py`) |
 
-## Memasukkan ke DWG Rev 24 Okt (AutoCAD)
+## Jadikan DWG langsung (otomatis, 1 perintah)
 
-DWG tidak bisa ditulis langsung dari lingkungan cloud ini (tidak ada AutoCAD/ODA), jadi semua hasil berupa DXF yang siap digabung:
+`D32_Rev28Okt.lsp` menerapkan semua revisi ke DWG Rev 24 Okt final di AutoCAD dan menyimpannya sebagai DWG baru. Isi layout tetap: Model, `SITEPLAN_A0_1-1000`, `ALUR_…`, `SITEPLAN_MURNI_…`, dan `SITEPLAN_DELINEASI_…`.
 
-1. Buka `SitePlan_Kroya_Smart_Unified_Market_Rev_24Okt_final.dwg`.
-2. **Model space**: `INSERT` → `D32_Overlay_Model_Rev28Okt_UTM49S.dxf` → titik sisip **0,0,0**, skala **1**, rotasi 0, centang **Explode**. Semua objek masuk tepat di tempatnya, di layer `D32_JLN_*`, `D32_RT_*`, `D32_POTONGAN`, dan `D32_NOMOR`.
-   - Bangunan yang dihapus ditutup oleh layer `D32_BANGUNAN_DIHAPUS_TUTUP`. Di DWG, hapus juga bangunan aslinya: pilih bangunan di bawah poligon `D32_BANGUNAN_DIHAPUS` atau gunakan SHP `Bangunan_Dihapus_Rev28Okt.shp` sebagai acuan.
-   - Draw order: pilih layer `D32_*`, lalu `DRAWORDER` → *Bring to Front*.
-   - Pohon berupa block `D32_POHON_TREMBESI`, `_KETAPANG`, dan `_TABEBUYA`, jadi bisa diganti simbolnya sekaligus.
-3. **Layout kop** (`SITEPLAN_A0_1-1000`): buka layout (paper space), `INSERT` → `D32_Overlay_KopA0_Rev28Okt_mm.dxf` di **0,0**, skala 1, Explode. Teks legenda baru jatuh di bawah legenda "Klaster UMKM & Simbol". Keterangan 34/35 dan luas elemen jatuh di kolom kanan.
-4. Simpan sebagai `…_Rev28Okt.dwg`. Penampang cukup dibuka dan di-*Save As* DWG.
+1. Buka `Claude outputs/Siteplan_Rev_24Okt/SitePlan_Kroya_Smart_Unified_Market_Rev_24Okt_final.dwg`.
+2. Seret `D32_Rev28Okt.lsp` ke jendela AutoCAD, atau muat lewat `APPLOAD`. Ketik **`D32REV28`**, lalu Enter.
+3. Perintah ini otomatis:
+   - menyisipkan overlay jalan + Taman RT ke model space di 0,0 skala 1. Model DWG memakai UTM 49S, sehingga posisinya langsung tepat;
+   - **menghapus bangunan yang tertabrak jalan dan bangunan di lahan Taman RT A dari DWG**. Yang dihapus adalah objek di layer `*BANGU*` / `*BAYANG*` yang seluruhnya berada dalam jejak bangunan + 2 m. Sudah dicek: tidak ada bangunan lain yang ikut terhapus;
+   - menaruh revisi di atas gambar lama (DRAWORDER);
+   - menambah legenda/keterangan kop di layout `SITEPLAN_A0_1-1000`. Posisinya disesuaikan otomatis terhadap teks "LEGENDA";
+   - menambah 5 layout penampang `PNP_A_BETET` … `PNP_D_AMPAS_WARAS` (A3, 1:100);
+   - menyimpan hasilnya sebagai **`Claude outputs/Siteplan_Rev_28Okt/SitePlan_Kroya_Smart_Unified_Market_Rev28Okt.dwg`** (DWG 2018). File Rev 24 Okt tidak diubah.
+4. Di akhir muncul ringkasan, misalnya jumlah objek yang dihapus dan pergeseran kop. Kalau ada langkah yang gagal, kotak pesan menyebutkan langkahnya.
+
+File DXF di `dxf/` dicari otomatis di folder `..\Siteplan_Rev_28Okt\dxf\` relatif terhadap DWG. Kalau tidak ketemu, AutoCAD meminta kamu memilih filenya. Kalau versi AutoCAD-mu menolak menyisipkan DXF, buka DXF itu dan *Save As* DWG dengan nama yang sama di folder yang sama, lalu jalankan `D32REV28` lagi (file .dwg diutamakan).
+
+Langkah manual lama (INSERT satu per satu) tidak diperlukan lagi.
 
 ## Catatan
 
