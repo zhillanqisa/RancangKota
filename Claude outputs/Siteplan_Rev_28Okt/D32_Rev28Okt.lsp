@@ -50,8 +50,11 @@
 
 (defun d32:doc () (vla-get-activedocument (vlax-get-acad-object)))
 
+(setq *d32-dir* nil)
 (defun d32:cari-file (nama / dirs hasil)
-  (setq dirs (list (strcat (getvar "DWGPREFIX") "..\\Siteplan_Rev_28Okt\\dxf\\")
+  (setq dirs (list (if *d32-dir* *d32-dir* (getvar "DWGPREFIX"))
+                   (if *d32-dir* (strcat *d32-dir* "dxf\\") (getvar "DWGPREFIX"))
+                   (strcat (getvar "DWGPREFIX") "..\\Siteplan_Rev_28Okt\\dxf\\")
                    (strcat (getvar "DWGPREFIX") "Siteplan_Rev_28Okt\\dxf\\")
                    (strcat (getvar "DWGPREFIX") "dxf\\")
                    (getvar "DWGPREFIX")))
@@ -60,7 +63,10 @@
       (if (and (not hasil) (findfile (strcat d nama ext)))
         (setq hasil (findfile (strcat d nama ext))))))
   (if (not hasil)
-    (setq hasil (getfiled (strcat "Pilih file " nama) (getvar "DWGPREFIX") "dxf;dwg" 0)))
+    (setq hasil (getfiled (strcat "Pilih file " nama " (folder hasil ekstrak ZIP > dxf)")
+                          (if *d32-dir* *d32-dir* (getvar "DWGPREFIX")) "dxf;dwg" 0)))
+  ;; file berikutnya dicari di folder yang sama, jadi cukup pilih sekali
+  (if hasil (setq *d32-dir* (strcat (vl-filename-directory hasil) "\\")))
   hasil)
 
 ;; sisipkan file sebagai block lalu explode di ruang aktif; T bila berhasil

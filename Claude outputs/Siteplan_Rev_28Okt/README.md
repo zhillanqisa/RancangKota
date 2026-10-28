@@ -40,6 +40,7 @@ Lanjutan dari Site Plan **Rev 24 Okt** (revisi kedua 28 Okt: jalan menyambung + 
 
 `D32_Rev28Okt.lsp` menerapkan semua revisi ke DWG Rev 24 Okt final di AutoCAD dan menyimpannya sebagai DWG baru. Isi layout tetap: Model, `SITEPLAN_A0_1-1000`, `ALUR_…`, `SITEPLAN_MURNI_…`, dan `SITEPLAN_DELINEASI_…`.
 
+0. Kalau folder ini belum ada di komputermu, unduh `D32_Rev28Okt_DWG_Kit.zip` (isi: LISP + 3 DXF) lalu ekstrak, sebaiknya ke `Claude outputs\` sehingga terbentuk `Claude outputs\Siteplan_Rev_28Okt\`.
 1. Buka `Claude outputs/Siteplan_Rev_24Okt/SitePlan_Kroya_Smart_Unified_Market_Rev_24Okt_final.dwg`.
 2. Seret `D32_Rev28Okt.lsp` ke jendela AutoCAD, atau muat lewat `APPLOAD`. Ketik **`D32REV28`**, lalu Enter.
 3. Perintah ini otomatis:
@@ -51,7 +52,7 @@ Lanjutan dari Site Plan **Rev 24 Okt** (revisi kedua 28 Okt: jalan menyambung + 
    - menyimpan hasilnya sebagai **`Claude outputs/Siteplan_Rev_28Okt/SitePlan_Kroya_Smart_Unified_Market_Rev28Okt.dwg`** (DWG 2018). File Rev 24 Okt tidak diubah.
 4. Di akhir muncul ringkasan, misalnya jumlah objek yang dihapus dan pergeseran kop. Kalau ada langkah yang gagal, kotak pesan menyebutkan langkahnya.
 
-File DXF di `dxf/` dicari otomatis di folder `..\Siteplan_Rev_28Okt\dxf\` relatif terhadap DWG. Kalau tidak ketemu, AutoCAD meminta kamu memilih filenya. Kalau versi AutoCAD-mu menolak menyisipkan DXF, buka DXF itu dan *Save As* DWG dengan nama yang sama di folder yang sama, lalu jalankan `D32REV28` lagi (file .dwg diutamakan).
+File DXF di `dxf/` dicari otomatis di folder `..\Siteplan_Rev_28Okt\dxf\` relatif terhadap DWG. Kalau tidak ketemu, AutoCAD meminta kamu memilih file pertama (`D32_Overlay_Model_…dxf` di folder `dxf`). File berikutnya otomatis dicari di folder yang sama. Kalau versi AutoCAD-mu menolak menyisipkan DXF, buka DXF itu dan *Save As* DWG dengan nama yang sama di folder yang sama, lalu jalankan `D32REV28` lagi (file .dwg diutamakan).
 
 Langkah manual lama (INSERT satu per satu) tidak diperlukan lagi.
 
